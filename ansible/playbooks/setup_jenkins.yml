@@ -58,7 +58,7 @@
         src: /dev/sdb
         fstype: ext4
         opts: defaults
-        state: absent
+        state: mounted
 
     - name: Set correct ownership for Jenkins home directory after mount
       file:
