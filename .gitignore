@@ -1,0 +1,12 @@
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+
+# Ansible secrets 
+ansible/vars/db_vars.yml
+ansible/inventory.ini
+
+# VSCode
+.vscode/

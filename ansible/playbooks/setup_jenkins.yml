@@ -1,0 +1,104 @@
+---
+- name: 🚀 Setup Jenkins Server (CI/CD environment)
+  hosts: jenkins_servers
+  become: true # Rulare cu privilegii sudo
+
+  tasks:
+    - name: Update apt cache and install Java 17 (needed for Jenkins/Maven)
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+          - openjdk-17-jdk 
+        state: present
+        update_cache: yes
+
+    - name: Install build tools (Maven and Git)
+      apt:
+        name: 
+          - maven 
+          - git
+        state: present
+
+    - name: Add Docker GPG apt Key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Add Docker Repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable
+        state: present
+
+    - name: Install Docker (using official Ansible module)
+      apt:
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+    
+    - name: Create Jenkins home directory (if not exists)
+      file:
+        path: /var/lib/jenkins
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    - name: Ensure Jenkins data disk is persisted and mounted 
+      mount:
+        path: /var/lib/jenkins
+        src: /dev/sdb
+        fstype: ext4
+        opts: defaults
+        state: absent
+
+    - name: Set correct ownership for Jenkins home directory after mount
+      file:
+        path: /var/lib/jenkins
+        state: directory
+        owner: jenkins
+        group: jenkins
+        recurse: yes
+
+    - name: Get Jenkins GPG key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        dest: /usr/share/keyrings/jenkins-keyring.asc
+        mode: '0644'
+
+    - name: Add Jenkins repository
+      ansible.builtin.apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        filename: jenkins
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+      notify: Restart Jenkins
+
+    - name: Enable Jenkins service
+      service:
+        name: jenkins
+        enabled: yes
+
+    - name: Add Ansible user to docker group 
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+  handlers:
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted

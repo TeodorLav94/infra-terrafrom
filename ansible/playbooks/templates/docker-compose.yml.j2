@@ -1,0 +1,9 @@
+services:
+  app:
+    image: {{ docker_image | default('docker.io/YOUR_DOCKERHUB_USER/spring-petclinic:latest') }}
+    container_name: petclinic
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - /opt/petclinic/.env
