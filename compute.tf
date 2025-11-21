@@ -39,8 +39,9 @@ resource "google_compute_instance" "app" {
   }
 
   metadata = {
-    ssh-keys = "tlavric:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "tlavric:${var.vm_ssh_public_key}"
   }
+
 
   tags = ["http-server", "petclinic-app"]
 }
@@ -90,6 +91,13 @@ resource "google_compute_instance" "jenkins" {
     access_config {
       nat_ip = google_compute_address.jenkins_static_ip.address
     }
+  }
+
+  service_account {
+    email  = "terraform-with-gcp@gd-gcp-internship-devops.iam.gserviceaccount.com"
+    scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
   }
 
   attached_disk {
