@@ -1,10 +1,11 @@
 ---
-- name: 🐳 Setup Application Server (Docker + Compose for Petclinic)
+- name: 🐳 Setup Application Server (Docker + gcloud for Petclinic)
   hosts: app_servers
   become: true
 
-  vars_files:
-    - ../vars/db_vars.yml   
+  vars:
+    gcp_project_id: "gd-gcp-internship-devops"
+    gar_host: "europe-west1-docker.pkg.dev"
 
   tasks:
     - name: Update apt cache and install base packages
@@ -18,12 +19,13 @@
         state: present
         update_cache: yes
 
+    # ---------------- Docker ----------------
     - name: Add Docker GPG key (Debian)
       apt_key:
         url: https://download.docker.com/linux/debian/gpg
         state: present
 
-    - name: Add Docker apt repository (Debian 12 bookworm)
+    - name: Add Docker apt repository (Debian 12)
       apt_repository:
         repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
         state: present
@@ -44,34 +46,33 @@
         state: started
         enabled: true
 
-
     - name: Add remote user to docker group
       user:
         name: "{{ ansible_user }}"
         groups: docker
         append: yes
 
-    - name: Create app directory
-      file:
-        path: /opt/petclinic
-        state: directory
-        mode: '0755'
+    # ---------------- gcloud + Artifact Registry auth ----------------
+    - name: Install Google Cloud SDK
+      apt:
+        name: google-cloud-cli
+        state: present
+        update_cache: yes
 
-    - name: Drop docker-compose.yml
-      template:
-        src: docker-compose.yml.j2
-        dest: /opt/petclinic/docker-compose.yml
-        mode: '0644'
-
-    - name: Drop .env with DB settings
-      template:
-        src: env.j2
-        dest: /opt/petclinic/.env
-        mode: '0600'
-
-    - name: Pull and start Petclinic
+    - name: Configure gcloud project for Artifact Registry (as app user)
+      become: true
+      become_user: "{{ ansible_user }}"
       shell: |
-        docker compose -f /opt/petclinic/docker-compose.yml pull
-        docker compose -f /opt/petclinic/docker-compose.yml up -d
+        gcloud config set project {{ gcp_project_id }}
+      environment:
+        CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
       args:
-        executable: /bin/bash
+        creates: "/home/{{ ansible_user }}/.config/gcloud/configurations/config_default"
+
+    - name: Configure Docker auth for Artifact Registry (as app user)
+      become: true
+      become_user: "{{ ansible_user }}"
+      shell: |
+        gcloud auth configure-docker {{ gar_host }} --quiet
+      environment:
+        CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
