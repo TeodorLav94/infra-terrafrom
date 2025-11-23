@@ -50,7 +50,7 @@ variable "jenkins_instance_name" {
 
 variable "my_ip_cidr" {
   type    = string
-  default = "85.204.75.2/32"
+  default = "84.232.193.167/32"
 }
 
 variable "vm_ssh_public_key" {

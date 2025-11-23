@@ -1,11 +1,10 @@
 pipeline {
-  agent { label 'infra' }   
+  agent { label 'infra' }   // același agent / node ca înainte
 
   environment {
     TF_IN_AUTOMATION = 'true'
-    // Dacă folosești service account JSON în Jenkins:
-    // GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-sa-terraform')
-  }
+    APP_TF_DIR       = 'app'   
+   }
 
   stages {
     stage('Checkout') {
@@ -16,59 +15,65 @@ pipeline {
 
     stage('Terraform Init') {
       steps {
-        sh '''
+        sh """
+          cd ${APP_TF_DIR}
           terraform init -input=false
-        '''
+        """
       }
     }
 
     stage('Terraform Format') {
       steps {
-        sh '''
+        sh """
+          cd ${APP_TF_DIR}
           echo "Running terraform fmt..."
           terraform fmt -recursive
-        '''
+        """
       }
     }
 
     stage('Terraform Validate') {
       steps {
-        sh '''
+        sh """
+          cd ${APP_TF_DIR}
           echo "Running terraform validate..."
           terraform validate
-        '''
+        """
       }
     }
 
     stage('Terraform Security Scan (optional)') {
       when {
-        expression { return false } // pune true dacă instalezi tfsec
+        expression { return false } // pune true dacă chiar vei rula tfsec
       }
       steps {
-        sh '''
+        sh """
+          cd ${APP_TF_DIR}
           echo "Running tfsec..."
           tfsec .
-        '''
+        """
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        sh '''
+        sh """
+          cd ${APP_TF_DIR}
           echo "Running terraform plan..."
           terraform plan -out=tfplan
-        '''
+        """
       }
     }
 
     stage('Terraform Apply (manual)') {
       steps {
         script {
-          input message: "Apply Terraform changes in GCP?", ok: "Apply"
-          sh '''
+          input message: "Apply Terraform changes in GCP (APP stack only)?", ok: "Apply"
+          sh """
+            cd ${APP_TF_DIR}
             echo "Applying terraform plan..."
             terraform apply tfplan
-          '''
+          """
         }
       }
     }
@@ -76,11 +81,12 @@ pipeline {
     stage('Terraform Destroy (manual)') {
       steps {
         script {
-          input message: "Destroy ALL infrastructure in this environment?", ok: "Destroy"
-          sh '''
-            echo "Destroying infrastructure..."
+          input message: "Destroy APP infrastructure (VM + SQL + LB)? Jenkins va rămâne în picioare.", ok: "Destroy"
+          sh """
+            cd ${APP_TF_DIR}
+            echo "Destroying APP infrastructure..."
             terraform destroy -auto-approve
-          '''
+          """
         }
       }
     }

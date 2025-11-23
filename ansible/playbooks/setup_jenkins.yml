@@ -61,30 +61,20 @@
           - docker-buildx-plugin
           - docker-compose-plugin
         state: present
-    
-    - name: Create Jenkins home directory (if not exists)
-      file:
-        path: /var/lib/jenkins
-        state: directory
-        owner: jenkins
-        group: jenkins
-        mode: '0755'
 
-    - name: Ensure Jenkins data disk is persisted and mounted 
-      mount:
-        path: /var/lib/jenkins
-        src: /dev/sdb
-        fstype: ext4
-        opts: defaults
-        state: mounted
+    - name: Install Python 3 and pip
+      apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        update_cache: yes
 
-    - name: Set correct ownership for Jenkins home directory after mount
-      file:
-        path: /var/lib/jenkins
-        state: directory
-        owner: jenkins
-        group: jenkins
-        recurse: yes
+    - name: Install semver library for Python
+      pip:
+        name: semver
+        executable: pip3
+        extra_args: "--break-system-packages"
 
     - name: Get Jenkins GPG key
       ansible.builtin.get_url:
@@ -109,7 +99,7 @@
         name: jenkins
         enabled: yes
 
-    - name: Add Ansible user to docker group 
+    - name: Add Jenkins user to docker group
       user:
         name: jenkins
         groups: docker

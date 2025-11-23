@@ -3,6 +3,6 @@ terraform {
 
   backend "gcs" {
     bucket = "tlav-bucket" 
-    prefix = "terraform/state/petclinic"
+    prefix = "terraform/app/state"
   }
 }
