@@ -18,8 +18,10 @@ resource "google_compute_firewall" "allow_ssh" {
     protocol = "tcp"
     ports    = ["22"]
   }
-
-  source_ranges = [var.my_ip_cidr]  # ex: "X.Y.Z.W/32"
+  source_ranges = [
+    var.my_ip_cidr,
+    var.subnet_cidr
+  ]
   target_tags   = ["jenkins-server", "petclinic-app"]
 }
 
@@ -32,41 +34,10 @@ resource "google_compute_firewall" "allow_internal_to_jenkins" {
     ports    = ["8080"]
   }
 
-  # PERMITE traficul din SUBRETEA
   source_ranges = [var.subnet_cidr]
 
   target_tags = ["jenkins-server"]
 }
-
-resource "google_compute_firewall" "allow_jenkins_agents" {
-  name    = "${var.network_name}-allow-jenkins-agents"
-  network = google_compute_network.vpc.name
-
-  allow {
-    protocol = "tcp"
-    ports    = ["50000"]
-  }
-
-  # permite traficul intern din subnetul VM-urilor
-  source_ranges = ["0.0.0.0/0"]
-
-  target_tags   = ["jenkins-server"]
-}
-
-resource "google_compute_firewall" "allow_jenkins_http_external" {
-  name    = "${var.network_name}-allow-jenkins-http-external"
-  network = google_compute_network.vpc.name
-
-  allow {
-    protocol = "tcp"
-    ports    = ["8080"]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-
-  target_tags = ["jenkins-server"]
-}
-
 
 resource "google_compute_firewall" "allow_jenkins" {
   name    = "${var.network_name}-allow-jenkins"

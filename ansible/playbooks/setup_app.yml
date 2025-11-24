@@ -76,3 +76,9 @@
         gcloud auth configure-docker {{ gar_host }} --quiet
       environment:
         CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
+
+    - name: Authorize Jenkins deploy SSH key for tlavric
+      ansible.builtin.authorized_key:
+        user: tlavric
+        key: "{{ lookup('file', 'files/jenkins_deploy_key.pub') }}"
+        state: present
