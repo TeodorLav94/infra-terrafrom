@@ -3,6 +3,8 @@
 terraform.tfstate
 terraform.tfstate.*
 crash.log
+*.tfvars
+
 
 # Ansible secrets 
 ansible/vars/db_vars.yml

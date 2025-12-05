@@ -1,6 +1,6 @@
 variable "project_id" {
   type = string
-  default = "gd-gcp-internship-devops"
+  default = "gd-gcp-gridu-devops-t1-t2"
 }
 
 variable "region" {
@@ -15,7 +15,7 @@ variable "zone" {
 
 variable "network_name" {
   type    = string
-  default = "tlav-petclinic-vpc"
+  default = "tlavric-vpc"
 }
 
 variable "subnet_cidr" {
@@ -50,7 +50,6 @@ variable "jenkins_instance_name" {
 
 variable "my_ip_cidr" {
   type    = string
-  default = "84.232.193.167/32"
 }
 
 variable "vm_ssh_public_key" {

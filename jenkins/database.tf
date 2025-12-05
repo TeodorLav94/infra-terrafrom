@@ -8,10 +8,6 @@ resource "random_password" "db_root_password" {
 }
 
 resource "google_sql_database_instance" "mysql_instance" {
-  depends_on = [
-    google_service_networking_connection.private_vpc_connection
-  ]
-  
   database_version = "MYSQL_8_0"
   project          = var.project_id
   region           = var.region
@@ -22,8 +18,12 @@ resource "google_sql_database_instance" "mysql_instance" {
     disk_size = 20
     
     ip_configuration {
-      ipv4_enabled = false
-      private_network = google_compute_network.vpc.self_link 
+      ipv4_enabled = true
+
+      authorized_networks {
+        name  = "home-ip"
+        value = var.my_ip_cidr     
+      }
     }
 
     backup_configuration {
@@ -55,7 +55,7 @@ output "db_password" {
   sensitive = true
 }
 
-output "db_private_ip" {
+output "db_public_ip" {
   value       = google_sql_database_instance.mysql_instance.ip_address[0].ip_address
-  description = "IP-ul privat al instanței Cloud SQL (Private IP)"
+  description = "IP-ul public al instanței Cloud SQL"
 }

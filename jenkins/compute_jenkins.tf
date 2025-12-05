@@ -25,15 +25,15 @@ resource "google_compute_instance" "jenkins" {
   }
 
   network_interface {
-    network    = data.google_compute_network.vpc.id
-    subnetwork = data.google_compute_subnetwork.subnet.id
+    network    = google_compute_network.vpc.id
+    subnetwork = google_compute_subnetwork.subnet.id
     access_config {
       nat_ip = google_compute_address.jenkins_static_ip.address
     }
   }
 
   service_account {
-    email  = "terraform-with-gcp@gd-gcp-internship-devops.iam.gserviceaccount.com"
+    email  = "terraform-cicd@gd-gcp-gridu-devops-t1-t2.iam.gserviceaccount.com"
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]

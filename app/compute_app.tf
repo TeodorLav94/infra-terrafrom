@@ -24,8 +24,8 @@ resource "google_compute_instance" "app" {
   }
 
   network_interface {
-    network    = google_compute_network.vpc.id
-    subnetwork = google_compute_subnetwork.subnet.id
+    network    = data.google_compute_network.vpc.id
+    subnetwork = data.google_compute_subnetwork.subnet.id
 
     access_config {
       nat_ip = google_compute_address.app_static_ip.address

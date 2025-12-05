@@ -44,7 +44,7 @@ pipeline {
 
     stage('Terraform Security Scan (optional)') {
       when {
-        expression { return false } // pune true dacă chiar vei rula tfsec
+        expression { return false } 
       }
       steps {
         sh """
@@ -81,7 +81,7 @@ pipeline {
     stage('Terraform Destroy (manual)') {
       steps {
         script {
-          input message: "Destroy APP infrastructure (VM + SQL + LB)? Jenkins va rămâne în picioare.", ok: "Destroy"
+          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins va rămâne în picioare.", ok: "Destroy"
           sh """
             cd ${APP_TF_DIR}
             echo "Destroying APP infrastructure..."
