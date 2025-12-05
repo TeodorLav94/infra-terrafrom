@@ -48,10 +48,6 @@ variable "jenkins_instance_name" {
   default = "tlav-jenkins-vm"
 }
 
-variable "my_ip_cidr" {
-  type    = string
-}
-
 variable "vm_ssh_public_key" {
   description = "SSH public key used to access VMs"
   type        = string
