@@ -24,6 +24,10 @@ resource "google_sql_database_instance" "mysql_instance" {
         name  = "home-ip"
         value = var.my_ip_cidr     
       }
+      authorized_networks {
+        name  = "app-vm"
+        value = var.app_vm_public_ip_cidr
+      }
     }
 
     backup_configuration {
@@ -57,5 +61,5 @@ output "db_password" {
 
 output "db_public_ip" {
   value       = google_sql_database_instance.mysql_instance.ip_address[0].ip_address
-  description = "IP-ul public al instanței Cloud SQL"
+  description = "Public IP for Cloud SQL instance"
 }

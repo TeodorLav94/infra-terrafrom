@@ -3,14 +3,11 @@ data "google_compute_image" "debian" {
   project = "debian-cloud"
 }
 
-# IP static pentru App VM
 resource "google_compute_address" "app_static_ip" {
   name   = "tlav-app-static-ip"
   region = var.region
 }
 
-
-# app VM
 resource "google_compute_instance" "app" {
   name         = var.app_instance_name
   machine_type = var.app_machine_type

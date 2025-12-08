@@ -3,15 +3,11 @@ data "google_compute_image" "debian" {
   project = "debian-cloud"
 }
 
-
-# IP static pentru Jenkins VM
 resource "google_compute_address" "jenkins_static_ip" {
   name   = "tlav-jenkins-static-ip"
   region = var.region
 }
 
-
-# Optional Jenkins VM
 resource "google_compute_instance" "jenkins" {
   name         = var.jenkins_instance_name
   machine_type = var.jenkins_machine_type
