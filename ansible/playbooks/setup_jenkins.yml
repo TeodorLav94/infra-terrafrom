@@ -1,7 +1,7 @@
 ---
 - name: 🚀 Setup Jenkins Server (CI/CD environment)
   hosts: jenkins_servers
-  become: true # Rulare cu privilegii sudo
+  become: true 
 
   tasks:
     - name: Update apt cache and install Java 17 (needed for Jenkins/Maven)

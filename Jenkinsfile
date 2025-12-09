@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'infra' }   // același agent / node ca înainte
+  agent { label 'infra' }   
 
   environment {
     TF_IN_AUTOMATION = 'true'
@@ -81,7 +81,7 @@ pipeline {
     stage('Terraform Destroy (manual)') {
       steps {
         script {
-          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins va rămâne în picioare.", ok: "Destroy"
+          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins will remain.", ok: "Destroy"
           sh """
             cd ${APP_TF_DIR}
             echo "Destroying APP infrastructure..."

@@ -1,11 +1,6 @@
----
-- name: 🐳 Setup Application Server (Docker + gcloud for Petclinic)
+- name: 🐳 Setup Application Server (Docker)
   hosts: app_servers
   become: true
-
-  vars:
-    gcp_project_id: "gd-gcp-internship-devops"
-    gar_host: "europe-west1-docker.pkg.dev"
 
   tasks:
     - name: Update apt cache and install base packages
@@ -51,28 +46,3 @@
         name: "{{ ansible_user }}"
         groups: docker
         append: yes
-
-    # ---------------- gcloud + Artifact Registry auth ----------------
-    - name: Install Google Cloud SDK
-      apt:
-        name: google-cloud-cli
-        state: present
-        update_cache: yes
-
-    - name: Configure gcloud project for Artifact Registry (as app user)
-      become: true
-      become_user: "{{ ansible_user }}"
-      shell: |
-        gcloud config set project {{ gcp_project_id }}
-      environment:
-        CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
-      args:
-        creates: "/home/{{ ansible_user }}/.config/gcloud/configurations/config_default"
-
-    - name: Configure Docker auth for Artifact Registry (as app user)
-      become: true
-      become_user: "{{ ansible_user }}"
-      shell: |
-        gcloud auth configure-docker {{ gar_host }} --quiet
-      environment:
-        CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
