@@ -8,6 +8,13 @@ resource "google_compute_address" "jenkins_static_ip" {
   region = var.region
 }
 
+resource "google_compute_disk" "jenkins_data" {
+  name = "jenkins-data-disk"
+  type = "pd-standard"
+  zone = var.zone
+  size = 30
+}
+
 resource "google_compute_instance" "jenkins" {
   name         = var.jenkins_instance_name
   machine_type = var.jenkins_machine_type
@@ -18,6 +25,10 @@ resource "google_compute_instance" "jenkins" {
       image = data.google_compute_image.debian.self_link
       size  = 30
     }
+  }
+
+  attached_disk {
+    source = google_compute_disk.jenkins_data.id
   }
 
   network_interface {

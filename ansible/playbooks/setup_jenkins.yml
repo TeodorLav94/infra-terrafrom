@@ -23,6 +23,32 @@
           - git
         state: present
 
+    - name: Ensure /var/lib/jenkins directory exists
+      file:
+        path: /var/lib/jenkins
+        state: directory
+        mode: '0755'
+
+    - name: Create filesystem on Jenkins data disk if needed
+      filesystem:
+        fstype: ext4
+        dev: /dev/disk/by-id/google-persistent-disk-1
+
+    - name: Mount Jenkins data disk on /var/lib/jenkins and persist in fstab
+      mount:
+        path: /var/lib/jenkins
+        src: /dev/disk/by-id/google-persistent-disk-1
+        fstype: ext4
+        opts: defaults
+        state: mounted
+
+    - name: Ensure Jenkins owns /var/lib/jenkins
+      file:
+        path: /var/lib/jenkins
+        owner: jenkins
+        group: jenkins
+        recurse: yes
+        
     - name: Add HashiCorp GPG key
       ansible.builtin.get_url:
         url: https://apt.releases.hashicorp.com/gpg

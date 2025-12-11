@@ -90,5 +90,21 @@ pipeline {
         }
       }
     }
+
+    stage('Configure App VM with Ansible') {
+      steps {
+        script {
+          def appIp = sh(
+            returnStdout: true,
+            script: 'cd app && terraform output -raw app_vm_ip'
+          ).trim()
+
+          sh """
+            cd ansible
+            ansible-playbook -i '${appIp},' -u tlavric playbooks/setup_app.yml
+          """
+        }
+      }
+    }
   }
 }
