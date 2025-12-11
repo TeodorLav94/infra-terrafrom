@@ -46,9 +46,3 @@
         name: "{{ ansible_user }}"
         groups: docker
         append: yes
-
-    - name: Authorize Jenkins deploy SSH key
-      ansible.builtin.authorized_key:
-        user: "{{ ansible_user }}"
-        key: "{{ lookup('file', 'files/jenkins_deploy_key.pub') }}"
-        state: present
