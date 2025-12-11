@@ -78,19 +78,6 @@ pipeline {
       }
     }
 
-    stage('Terraform Destroy (manual)') {
-      steps {
-        script {
-          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins will remain.", ok: "Destroy"
-          sh """
-            cd ${APP_TF_DIR}
-            echo "Destroying APP infrastructure..."
-            terraform destroy -auto-approve
-          """
-        }
-      }
-    }
-
     stage('Configure App VM with Ansible') {
       steps {
         script {
@@ -102,6 +89,19 @@ pipeline {
           sh """
             cd ansible
             ansible-playbook -i '${appIp},' -u tlavric playbooks/setup_app.yml
+          """
+        }
+      }
+    }
+
+    stage('Terraform Destroy (manual)') {
+      steps {
+        script {
+          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins will remain.", ok: "Destroy"
+          sh """
+            cd ${APP_TF_DIR}
+            echo "Destroying APP infrastructure..."
+            terraform destroy -auto-approve
           """
         }
       }
