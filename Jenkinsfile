@@ -83,7 +83,7 @@ pipeline {
         script {
           def appIp = sh(
             returnStdout: true,
-            script: 'cd app && terraform output -raw app_vm_ip'
+            script: "cd ${APP_TF_DIR} && terraform output -raw app_vm_internal_ip"
           ).trim()
 
           sh """

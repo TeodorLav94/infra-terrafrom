@@ -48,7 +48,7 @@
         owner: jenkins
         group: jenkins
         recurse: yes
-        
+
     - name: Add HashiCorp GPG key
       ansible.builtin.get_url:
         url: https://apt.releases.hashicorp.com/gpg
@@ -64,6 +64,12 @@
     - name: Install Terraform
       apt:
         name: terraform
+        state: present
+        update_cache: yes
+
+    - name: Install Ansible (for running infra playbooks from Jenkins)
+      apt:
+        name: ansible
         state: present
         update_cache: yes
 

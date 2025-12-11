@@ -51,6 +51,6 @@ resource "google_compute_instance_group" "app_ig" {
   }
 }
 
-output "app_vm_ip" {
-  value = google_compute_address.app_static_ip.address
+output "app_vm_internal_ip" {
+  value = google_compute_instance.app.network_interface[0].network_ip
 }
