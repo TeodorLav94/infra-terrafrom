@@ -88,7 +88,7 @@ pipeline {
 
           sh """
             cd ansible
-            ansible-playbook -i '${appIp},' -u tlavric playbooks/setup_app.yml
+            ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${appIp},' -u tlavric playbooks/setup_app.yml
           """
         }
       }
