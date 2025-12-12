@@ -3,9 +3,12 @@ data "google_compute_image" "debian" {
   project = "debian-cloud"
 }
 
-resource "google_compute_address" "app_static_ip" {
-  name   = "tlav-app-static-ip"
-  region = var.region
+data "terraform_remote_state" "jenkins" {
+  backend = "gcs"
+  config = {
+    bucket = "tlav-bucket"
+    prefix = "terraform/jenkins/state"  
+  }
 }
 
 resource "google_compute_instance" "app" {
@@ -25,7 +28,7 @@ resource "google_compute_instance" "app" {
     subnetwork = data.google_compute_subnetwork.subnet.id
 
     access_config {
-      nat_ip = google_compute_address.app_static_ip.address
+      nat_ip = data.terraform_remote_state.jenkins.outputs.app_static_ip
     }
   }
 
