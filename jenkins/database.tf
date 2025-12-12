@@ -26,7 +26,7 @@ resource "google_sql_database_instance" "mysql_instance" {
       }
       authorized_networks {
         name  = "app-vm"
-        value = var.app_vm_public_ip_cidr
+        value = "${google_compute_address.app_static_ip.address}/32"
       }
     }
 

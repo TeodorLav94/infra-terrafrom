@@ -53,6 +53,15 @@ resource "google_compute_instance" "jenkins" {
   tags = ["jenkins-server"]
 }
 
+resource "google_compute_address" "app_static_ip" {
+  name   = "tlav-app-static-ip"
+  region = var.region
+}
+
+output "app_static_ip" {
+  value = google_compute_address.app_static_ip.address
+}
+
 output "jenkins_vm_ip" {
   value = google_compute_address.jenkins_static_ip.address
 }
