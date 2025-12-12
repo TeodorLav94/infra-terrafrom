@@ -11,6 +11,7 @@
           - curl
           - gnupg
           - git
+          - default-mysql-client
         state: present
         update_cache: yes
 
