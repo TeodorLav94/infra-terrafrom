@@ -78,6 +78,32 @@ pipeline {
       }
     }
 
+    stage('Publish Terraform Outputs (artifact)') {
+      steps {
+        script {
+          sh """
+            set -e
+            cd ${APP_TF_DIR}
+
+            APP_VM_IP=\$(terraform output -raw app_vm_internal_ip)
+            APP_URL=\$(terraform output -raw app_url)
+            DB_HOST=\$(terraform output -raw db_public_ip)
+
+            cat > ../infra-outputs.env <<EOF
+            APP_VM_IP=\${APP_VM_IP}
+            APP_URL=\${APP_URL}
+            DB_HOST=\${DB_HOST}
+            EOF
+
+            echo "Generated infra-outputs.env:"
+            cat ../infra-outputs.env
+          """
+          archiveArtifacts artifacts: 'infra-outputs.env', fingerprint: true
+        }
+      }
+    }
+
+
     stage('Configure App VM with Ansible') {
       steps {
         script {
