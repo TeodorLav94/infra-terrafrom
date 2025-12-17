@@ -3,8 +3,10 @@ pipeline {
 
   environment {
     TF_IN_AUTOMATION = 'true'
-    APP_TF_DIR       = 'app'   
-   }
+    APP_TF_DIR       = 'app'
+    JENKINS_TF_DIR   = 'jenkins'
+  }
+
 
   stages {
     stage('Checkout') {
@@ -13,10 +15,12 @@ pipeline {
       }
     }
 
-    stage('Terraform Init') {
+    stage('Terraform Init (app + jenkins)') {
       steps {
         sh """
           cd ${APP_TF_DIR}
+          terraform init -input=false
+          cd ../${JENKINS_TF_DIR}
           terraform init -input=false
         """
       }
@@ -80,28 +84,31 @@ pipeline {
 
     stage('Publish Terraform Outputs (artifact)') {
       steps {
-        script {
-          sh """
-            set -e
-            cd ${APP_TF_DIR}
+        sh """
+          set -e
 
-            APP_VM_IP=\$(terraform output -raw app_vm_internal_ip)
-            APP_URL=\$(terraform output -raw app_url)
-            DB_HOST=\$(terraform output -raw db_public_ip)
+          # APP stack outputs
+          cd ${APP_TF_DIR}
+          APP_VM_IP=\$(terraform output -raw app_vm_internal_ip)
+          APP_URL=\$(terraform output -raw app_url)
 
-            cat > ../infra-outputs.env <<EOF
-            APP_VM_IP=\${APP_VM_IP}
-            APP_URL=\${APP_URL}
-            DB_HOST=\${DB_HOST}
-            EOF
+          # DB outputs (din stack-ul jenkins)
+          cd ../${JENKINS_TF_DIR}
+          DB_HOST=\$(terraform output -raw db_public_ip)
 
-            echo "Generated infra-outputs.env:"
-            cat ../infra-outputs.env
-          """
-          archiveArtifacts artifacts: 'infra-outputs.env', fingerprint: true
-        }
+          cat > ../infra-outputs.env <<EOF
+          APP_VM_IP=\${APP_VM_IP}
+          APP_URL=\${APP_URL}
+          DB_HOST=\${DB_HOST}
+          EOF
+
+          echo "Generated infra-outputs.env:"
+          cat ../infra-outputs.env
+        """
+        archiveArtifacts artifacts: 'infra-outputs.env', fingerprint: true
       }
     }
+
 
 
     stage('Configure App VM with Ansible') {
