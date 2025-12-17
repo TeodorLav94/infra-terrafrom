@@ -6,8 +6,11 @@ pipeline {
     APP_TF_DIR       = 'app'
     JENKINS_TF_DIR   = 'jenkins'
   }
-
-
+  
+  parameters {
+    booleanParam(name: 'RUN_APPLY',   defaultValue: true,  description: 'Run terraform apply')
+    booleanParam(name: 'RUN_DESTROY', defaultValue: false, description: 'Run terraform destroy')
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -69,16 +72,13 @@ pipeline {
       }
     }
 
-    stage('Terraform Apply (manual)') {
+    stage('Terraform Apply') {
+      when { expression { return params.RUN_APPLY } }
       steps {
-        script {
-          input message: "Apply Terraform changes in GCP (APP stack only)?", ok: "Apply"
-          sh """
-            cd ${APP_TF_DIR}
-            echo "Applying terraform plan..."
-            terraform apply tfplan
-          """
-        }
+        sh """
+          cd ${APP_TF_DIR}
+          terraform apply tfplan
+        """
       }
     }
 
@@ -127,16 +127,13 @@ pipeline {
       }
     }
 
-    stage('Terraform Destroy (manual)') {
+    stage('Terraform Destroy') {
+      when { expression { return params.RUN_DESTROY } }
       steps {
-        script {
-          input message: "Destroy APP infrastructure (App VM + Instance Group + Load Balancer)? Jenkins will remain.", ok: "Destroy"
-          sh """
-            cd ${APP_TF_DIR}
-            echo "Destroying APP infrastructure..."
-            terraform destroy -auto-approve
-          """
-        }
+        sh """
+          cd ${APP_TF_DIR}
+          terraform destroy -auto-approve
+        """
       }
     }
   }
